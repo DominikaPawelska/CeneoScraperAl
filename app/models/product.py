@@ -5,6 +5,7 @@ from app.models.opinion import Opinion
 import requests
 from bs4 import BeautifulSoup
 
+
 class Product:
 
     url_pre = 'https://www.ceneo.pl'
@@ -24,9 +25,18 @@ class Product:
             for opinion in opinions:
                 self.opinions.append(Opinion().extractOpinion(opinion))
             try:
-                url = self.url_pre + extractElement(pageDOM, 'a.pagination__next', "href") 
+                url = self.url_pre + \
+                    extractElement(pageDOM, 'a.pagination__next', "href")
             except TypeError:
                 url = None
 
     def __str__(self):
-        pass
+        return """ product:{}<br>
+        name: {}<br> """ .format(self.productId, self.name)+"<br".join(str(opinion)for opinion in self.opinions)
+
+    def __dict__(self):
+        return{
+            "productId": self.productId,
+            "name": self.name,
+            "opinions": [dict(opinions)for opinion in self.opinions]
+        }

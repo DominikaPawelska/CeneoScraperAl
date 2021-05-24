@@ -1,6 +1,7 @@
 from app import app
 from app.utils import extractElement
 
+
 class Opinion:
 
     selectors = {
@@ -30,8 +31,8 @@ class Opinion:
         self.purchased = purchased
         self.purchaseDate = purchaseDate
         self.publishDate = publishDate
-    
-    def extractOpinion(self,opinionTree):
+
+    def extractOpinion(self, opinionTree):
         for key, value in self.selectors.items():
             setattr(self, key, extractElement(opinionTree, *value))
         self.opinionId = opinionTree["data-entry-id"]
@@ -39,19 +40,25 @@ class Opinion:
 
     def transformOpinion(self):
         try:
-            self.advantages = self.advantages.replace("Zalety\n", "").replace("\n", ", ")
+            self.advantages = self.advantages.replace(
+                "Zalety\n", "").replace("\n", ", ")
         except AttributeError:
             pass
         try:
-            self.disadvantages = self.disadvantages.replace("Wady\n", "").replace("\n", ", ")
+            self.disadvantages = self.disadvantages.replace(
+                "Wady\n", "").replace("\n", ", ")
         except AttributeError:
             pass
         self.recommendation = True if self.recommendation == "Polecam" else False if self.recommendation == "Nie polecam" else None
         self.stars = float(self.stars.split("/")[0].replace(",", "."))
-        self.content = self.content.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+        self.content = self.content.replace(
+            "\n", " ").replace("\r", " ").replace("\t", " ")
         self.helpful = int(self.helpful)
         self.unhelpful = int(self.unhelpful)
 
     def __str__(self):
-        pass
-        
+
+        return "opinionId:"+str(self.opinionId)+"<br>"+"<br>".join(key+": "+(str(getattr(self, key)) for key in self.selectors.keys()))
+
+    def __dict__(self):
+        return {"opinionId": self.opinionId}.update {key: getattr(self, key)) for key in self.selectors.keys()})
