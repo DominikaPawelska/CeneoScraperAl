@@ -1,13 +1,14 @@
-from wtforms import Form, BooleanField, StringField
+from wtforms import Form, StringField, SubmitField, validators
 
 
 class ProductForm(Form):
     productId = StringField(
-        "Enter Product ID",
-        [validators.DataRequired(message="Pleas enter ProductID"),
-            validators.Lenght(
-                min=8, max=8, message="Product Id must chave 8 charachters")
+        'Enter product Id',
+        [
+            validators.DataRequired(message="Product ID id needed"),
+            validators.Length(
+                min=8, max=8, message="Product Id must be 8 characters long"),
             validators.Regexp(
-                regex="^\\d$", message="Product Id consist only of digits")
-         ])
-    submit = SubmitField("Find Product")
+                regex="^[0-9]+$", message="Digits only")
+        ])
+    submit = SubmitField('Extract')

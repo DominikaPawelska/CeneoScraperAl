@@ -3,6 +3,7 @@ from app import app
 from app.utils import extractElement
 from app.models.opinion import Opinion
 import requests
+import json
 from bs4 import BeautifulSoup
 
 
@@ -16,8 +17,11 @@ class Product:
         self.name = name
         self.opinions = opinions
 
+    def opinionsPageUrl(self):
+        return self.url_pre+'/'+self.productId+self.url_post
+
     def extractProduct(self):
-        url = self.url_pre+'/'+self.productId+self.url_post
+        url = self.opinionsPageUrl()
         while url:
             respons = requests.get(url)
             pageDOM = BeautifulSoup(respons.text, 'html.parser')
@@ -30,13 +34,17 @@ class Product:
             except TypeError:
                 url = None
 
+    def exportProduct(self):
+        with open("opinions/{}.json".format(self.productId), "w", encoding="UTF-8") as jf:
+            json.dump(dict(self), jf, indent=4, ensure_ascii=False)
+
     def __str__(self):
-        return """ product:{}<br>
-        name: {}<br> """ .format(self.productId, self.name)+"<br".join(str(opinion)for opinion in self.opinions)
+        return '''productId: {}<br>
+        name: {}<br>'''.format(self.productId, self.name)+"<br>".join(str(opinion) for opinion in self.opinions)
 
     def __dict__(self):
-        return{
+        return {
             "productId": self.productId,
             "name": self.name,
-            "opinions": [dict(opinions)for opinion in self.opinions]
+            "opinions": [dict(opinion) for opinion in self.opinions]
         }

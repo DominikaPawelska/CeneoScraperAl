@@ -6,7 +6,7 @@ class Opinion:
 
     selectors = {
         "author": ["span.user-post__author-name"],
-        "recomendation": ["span.user-post__author-recomendation > em"],
+        "recommendation": ["span.user-post__author-recomendation > em"],
         "stars": ["span.user-post__score-count"],
         "content": ["div.user-post__text"],
         "advantages": ["div.review-feature__col:has(> div[class*=\"positives\"])"],
@@ -57,8 +57,8 @@ class Opinion:
         self.unhelpful = int(self.unhelpful)
 
     def __str__(self):
-
-        return "opinionId:"+str(self.opinionId)+"<br>"+"<br>".join(key+": "+(str(getattr(self, key)) for key in self.selectors.keys()))
+        return 'opinionId: '+str(self.opinionId)+'<br>'+'<br>'.join(key+": "+str(getattr(self, key)) for key in self.selectors.keys())
 
     def __dict__(self):
-        return {"opinionId": self.opinionId}.update {key: getattr(self, key)) for key in self.selectors.keys()})
+        return {'opinionId': self.opinionId}.update({key: getattr(self, key)
+                                                     for key in self.selectors.keys()})
