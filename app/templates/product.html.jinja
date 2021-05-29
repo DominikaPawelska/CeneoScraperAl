@@ -1,10 +1,6 @@
 {% extends "layout.html.jinja" %}
 
 {% block middle %}
-    <h2> Products </h2>
-    <ul class="list-group list-group-flush" >
-    {% for product in ProductsList %}
-        <li class="list-group-item>"><a href="{{url_for('product', productId=product)}}">{{product}}</li>
-    {%endfor%}
-    </ul>
+    <h2 style="color: #E9F1F7;"> {{ productId }} </h2>
+
 {% endblock middle %}

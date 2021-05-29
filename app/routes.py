@@ -45,4 +45,4 @@ def products():
 
 @app.route('/author')
 def author():
-    pass
+    return "author page"
