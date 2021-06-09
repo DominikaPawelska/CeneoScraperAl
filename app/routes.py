@@ -9,12 +9,10 @@ import json
 
 app.config['SECRET_KEY'] = "NotSoSecretKey"
 
-
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('main.html.jinja')
-
 
 @app.route('/extract', methods=['GET', 'POST'])
 def extract():
@@ -27,22 +25,21 @@ def extract():
             product.exportProduct()
             return redirect(url_for('product', productId=product.productId))
         else:
-            form.productId.errors.append(
-                "For given productId there is no product")
+            form.productId.errors.append("For given productId there is no product")
     return render_template('extract.html.jinja', form=form)
-
 
 @app.route('/product/<productId>')
 def product(productId):
-    return render_template('product.html.jinja', productId=productId)
-
+    product = Product(productId)
+    opinions = product.importProduct().opinionsToDataFrame()
+    return render_template('product.html.jinja', tables=[opinions.to_html(classes='table table-striped table-sm table-responsive', table_id="opinions")])
 
 @app.route('/products')
 def products():
-    productsList = [x.split(".")[0] for x in listdir("app/opinions")]
+    productsList = [x.split(".")[0] for x in  listdir("app/opinions")]
     return render_template('products.html.jinja', productsList=productsList)
-
 
 @app.route('/author')
 def author():
-    return "author page"
+    return render_template('author.html.jinja')
+    

@@ -1,5 +1,5 @@
 from app import app
-from app.utlis import extractElement
+from app.utils import extractElement
 
 
 class Opinion:

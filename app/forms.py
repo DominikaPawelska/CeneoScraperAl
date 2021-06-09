@@ -6,10 +6,10 @@ class ProductForm(FlaskForm):
     productId = StringField(
         'Enter product Id',
         [
-            validators.DataRequired(message="Product Id must be given"),
+            validators.DataRequired(message="ID must be given"),
             validators.Length(
-                min=8, max=8, message="Product Id must have 8 characters"),
+                min=8, max=10, message="Product Id must have at least  8 characters"),
             validators.Regexp(
-                regex="^[0-9]+$", message="Product Id can contain only digits")
+                regex="^[0-9]+$", message="id contains only digits ")
         ])
     submit = SubmitField('Extract')

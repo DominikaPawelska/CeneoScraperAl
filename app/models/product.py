@@ -1,11 +1,12 @@
 
 from app import app
-from app.utlis import extractElement
 from app.models.opinion import Opinion
-import requests
-import json
+from app.utils import extractElement
 from bs4 import BeautifulSoup
 
+import pandas as pd
+import requests
+import json
 
 class Product:
 
@@ -16,28 +17,38 @@ class Product:
         self.productId = productId
         self.name = name
         self.opinions = opinions
+        
 
     def opinionsPageUrl(self):
         return self.url_pre+'/'+self.productId+self.url_post
-
+    
     def extractProduct(self):
         url = self.opinionsPageUrl()
         while url:
             respons = requests.get(url)
             pageDOM = BeautifulSoup(respons.text, 'html.parser')
             opinions = pageDOM.select("div.js_product-review")
+
+            self.name = pageDOM.select('div.js_searchInGoogleTooltip')[0].text.strip()
             for opinion in opinions:
-                self.opinions.append(Opinion().extractOpinion(
-                    opinion).transformOpinion())
+                self.opinions.append(Opinion().extractOpinion(opinion).transformOpinion())
             try:
-                url = self.url_pre + \
-                    extractElement(pageDOM, 'a.pagination__next', "href")
+                url = self.url_pre + extractElement(pageDOM, 'a.pagination__next', "href") 
             except TypeError:
                 url = None
 
     def exportProduct(self):
         with open("app/opinions/{}.json".format(self.productId), "w", encoding="UTF-8") as jf:
             json.dump(self.toDict(), jf, indent=4, ensure_ascii=False)
+
+    def importProduct(self):
+        with open("app/opinions/{}.json".format(self.productId), "r", encoding="UTF-8") as jf:
+            product = json.load(jf)
+            self.name = product['name']
+            opinions = product['opinions']
+            for opinion in opinions:
+                self.opinions.append(Opinion(**opinion))
+        return self
 
     def __str__(self):
         return '''productId: {}<br>
@@ -49,3 +60,9 @@ class Product:
             "name": self.name,
             "opinions": [opinion.toDict() for opinion in self.opinions]
         }
+
+    def opinionsToDataFrame(self):
+        opinions = pd.DataFrame.from_records(
+            [opinion.toDict() for opinion in self.opinions])
+        
+        return opinions

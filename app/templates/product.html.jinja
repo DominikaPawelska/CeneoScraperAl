@@ -1,6 +1,17 @@
 {% extends "layout.html.jinja" %}
 
 {% block middle %}
-    <h2 style="color: #E9F1F7;"> {{ productId }} </h2>
+   {#<p> {{productId}} </p>#}
+   {%for table in tables%}
+        {{table|safe}}
+    {%endfor%}
 
 {% endblock middle %}
+{%block script%}
+    <script>
+        $(document).ready( function() {
+            $("#opinions").DataTable();
+        });
+        </script>
+{%endblock script%}
+        
