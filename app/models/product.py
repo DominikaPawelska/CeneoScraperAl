@@ -1,4 +1,5 @@
 
+from re import S
 from app import app
 from app.models.opinion import Opinion
 from app.utils import extractElement
@@ -13,7 +14,7 @@ class Product:
     url_pre = 'https://www.ceneo.pl'
     url_post = '#tab=reviews'
 
-    def __init__(self, productId=None, name=None, opinions=[]):
+    def __init__(self, productId=None, name=None, opinions=[], averageScore=None, opinionsCount=None, prosCount=None, consCount=None):
         self.productId = productId
         self.name = name
         self.opinions = opinions
@@ -58,17 +59,22 @@ class Product:
         self.consCount = int(opinions['disadvantages'].count())
 
     def exportProduct(self):
+        with open("app/products/{}.json".format(self.productId), "w", encoding="UTF-8") as jf:
+            json.dump(self.productToDict(), jf,
+                      indent=4, ensure_ascii=False)
         with open("app/opinions/{}.json".format(self.productId), "w", encoding="UTF-8") as jf:
-            json.dump(self.toDict(), jf, indent=4, ensure_ascii=False)
+            json.dump(self.opinionsToDictsList(), jf, indent=4, ensure_ascii=False)
 
     def importProduct(self):
-        with open("app/opinions/{}.json".format(self.productId), "r", encoding="UTF-8") as jf:
+        with open("app/products/{}.json".format(self.productId), "r", encoding="UTF-8") as jf:
             product = json.load(jf)
-            self.name = product['name']
-            opinions = product['opinions']
+            self.__init__(**product)    
+        with open("app/opinions/{}.json".format(self.productId), "r", encoding="UTF-8") as jf:
+            opinions = json.load(jf)
             for opinion in opinions:
                 self.opinions.append(Opinion(**opinion))
         return self
+
 
     def __str__(self):
         return '''productId: {}<br>
@@ -92,7 +98,6 @@ class Product:
         return [opinion.toDict() for opinion in self.opinions]
 
     def opinionsToDataFrame(self):
-        # opinions = pd.DataFrame.from_records(
-            # [opinion.toDict() for opinion in self.opinions])
+        
         opinions = pd.json_normalize([opinion.toDict() for opinion in self.opinions])
         return opinions

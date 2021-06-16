@@ -19,9 +19,9 @@ def extract():
     form = ProductForm()
     if request.method == 'POST' and form.validate_on_submit():
         product = Product(request.form['productId'])
-        respons = requests.get(product.opinionsPageUrl())
-        if respons.status_code == 200:
+        if (product.extractName()):
             product.extractProduct()
+            product.countProductStatistics()
             product.exportProduct()
             return redirect(url_for('product', productId=product.productId))
         else:
@@ -34,10 +34,16 @@ def product(productId):
     opinions = product.importProduct().opinionsToDataFrame()
     return render_template('product.html.jinja', tables=[opinions.to_html(classes='table table-striped table-sm table-responsive', table_id="opinions")])
 
+
 @app.route('/products')
 def products():
     productsList = [x.split(".")[0] for x in  listdir("app/opinions")]
-    return render_template('products.html.jinja', productsList=productsList)
+    productsDictsList = []
+    for product in productsList:
+        with open("app/products/{}.json".format(product), "r", encoding="UTF-8") as jf:
+            productsDictsList.append(json.load(jf))
+    
+    return render_template('products.html.jinja', products=productsDictsList)
 
 @app.route('/author')
 def author():
