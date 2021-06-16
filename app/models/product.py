@@ -17,10 +17,23 @@ class Product:
         self.productId = productId
         self.name = name
         self.opinions = opinions
+        self.opinions = opinions.copy()
+        self.averageScore = averageScore
+        self.opinionsCount = opinionsCount
+        self.prosCount = prosCount
+        self.consCount = consCount
         
 
     def opinionsPageUrl(self):
         return self.url_pre+'/'+self.productId+self.url_post
+
+    def extractName(self):
+        respons = requests.get(self.opinionsPageUrl())
+        if respons.status_code == 200:
+            pageDOM = BeautifulSoup(respons.text, 'html.parser')
+            self.name = extractElement(
+                pageDOM, 'h1.product-top__product-info__name')
+        return self.name
     
     def extractProduct(self):
         url = self.opinionsPageUrl()
@@ -36,6 +49,13 @@ class Product:
                 url = self.url_pre + extractElement(pageDOM, 'a.pagination__next', "href") 
             except TypeError:
                 url = None
+
+    def countProductStatistics(self):
+        opinions = self.opinionsToDataFrame()
+        self.averageScore = float(opinions['stars'].mean())
+        self.opinionsCount = len(self.opinions)
+        self.prosCount = int(opinions['advantages'].count())
+        self.consCount = int(opinions['disadvantages'].count())
 
     def exportProduct(self):
         with open("app/opinions/{}.json".format(self.productId), "w", encoding="UTF-8") as jf:
@@ -55,14 +75,24 @@ class Product:
         name: {}<br>'''.format(self.productId, self.name)+"<br>".join(str(opinion) for opinion in self.opinions)
 
     def toDict(self):
+        return (self.productToDict()|{"opinions": self.opinionsToDictsList()})
+
+    def productToDict(self):
         return {
             "productId": self.productId,
             "name": self.name,
-            "opinions": [opinion.toDict() for opinion in self.opinions]
+            "averageScore": self.averageScore,
+            "opinionsCount": self.opinionsCount,
+            "prosCount": self.prosCount,
+            "consCount": self.consCount
         }
+        
+
+    def opinionsToDictsList(self):
+        return [opinion.toDict() for opinion in self.opinions]
 
     def opinionsToDataFrame(self):
-        opinions = pd.DataFrame.from_records(
-            [opinion.toDict() for opinion in self.opinions])
-        
+        # opinions = pd.DataFrame.from_records(
+            # [opinion.toDict() for opinion in self.opinions])
+        opinions = pd.json_normalize([opinion.toDict() for opinion in self.opinions])
         return opinions
