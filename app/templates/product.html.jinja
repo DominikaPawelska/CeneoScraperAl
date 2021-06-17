@@ -1,7 +1,7 @@
 {% extends "layout.html.jinja" %}
 
 {% block middle %}
-   {#<p> {{productId}} </p>#}
+   
    {%for table in tables%}
         {{table|safe}}
     {%endfor%}
